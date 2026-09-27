@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>abree</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  :root{
+    --bg: #ffffff;
+    --card: #a7a9ca;
+    --ink: #2A2724;
+    --ink-soft: #160c02;
+    --line: #E9E3DD;
+    --accent: #0b11b8;
+    --accent-soft: #88b4d5;
+    --black: #000000;
+  }
+
+  * { box-sizing: border-box; }
+
+  body{
+    margin: 0;
+    min-height: 100vh;
+    background: var(--black);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .card{
+    width: 100%;
+    max-width: 440px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 40px 32px;
+    box-shadow: 0 24px 60px -30px rgba(42,39,36,0.25);
+  }
+
+  /* ---------- Espaço para foto ----------
+     Troque a "background" abaixo por:
+     background-image: url('sua-foto.jpg');
+     ou insira uma tag <img> dentro da div.photo
+  --------------------------------------- */
+  .photo{
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: 14px;
+    margin-bottom: 28px;
+    background: var(--accent-soft);
+    border: 1px dashed #D9B8BA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #B98A8E;
+    font-size: 13px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .photo img{ width:100%; height:100%; object-fit: cover; }
+
+  h1{
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 1.3;
+    margin: 0 0 8px;
+  }
+
+  p.subtitle{
+    color: var(--ink-soft);
+    font-size: 15px;
+    margin: 0 0 28px;
+    line-height: 1.5;
+  }
+
+  .step{ display: none; }
+  .step.active{ display: block; animation: rise .5s ease; }
+
+  @keyframes rise{
+    from{ opacity: 0; transform: translateY(10px); }
+    to{ opacity: 1; transform: translateY(0); }
+  }
+
+  button{
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    border: none;
+  }
+
+  .btn-primary{
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 15px 20px;
+    border-radius: 12px;
+    transition: transform .15s ease, background .2s ease;
+  }
+  .btn-primary:hover{ background: #070d71; }
+  .btn-primary:active{ transform: scale(0.98); }
+
+  .field{
+    margin-bottom: 22px;
+  }
+
+  label.field-label{
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+
+  input[type="date"],
+  input[type="time"],
+  input[type="text"],
+  textarea{
+    display: block;        /* Necessário para margens automáticas funcionarem em elementos como input/textarea */
+    margin: 0 auto;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: #e7e7e7;
+    color: var(--ink);
+    outline: none;
+    transition: border-color .15s ease;
+  }
+  input:focus, textarea:focus{
+    border-color: var(--accent);
+  }
+
+  textarea{ resize: vertical; min-height: 80px; }
+
+  .options{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .option:has(input:checked){
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .option input{ accent-color: var(--accent); width: 16px; height: 16px; }
+  .option span{ font-size: 14px; }
+
+  .sub-reveal{
+    margin-top: 12px;
+    display: none;
+  }
+  .sub-reveal.show{ display: block; animation: rise .35s ease; }
+
+  .note{
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 8px;
+  }
+
+  .error-msg{
+    display: none;
+    font-size: 12.5px;
+    color: var(--accent);
+    margin-top: 7px;
+  }
+  .error-msg.show{ display: block; }
+
+  .field.invalid input[type="date"],
+  .field.invalid input[type="time"],
+  .field.invalid input[type="text"],
+  .field.invalid .option{
+    border-color: var(--accent);
+  }
+
+  .btn-primary[disabled]{
+    opacity: .65;
+    cursor: default;
+  }
+
+  .send-error{
+    display: none;
+    font-size: 13px;
+    color: var(--accent);
+    margin-top: 14px;
+    text-align: center;
+  }
+  .send-error.show{ display: block; }
+
+  .summary{
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-top: 4px;
+  }
+  .summary-row{
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 14px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .summary-row:last-child{ border-bottom: none; }
+  .summary-row .k{ color: var(--ink-soft); }
+  .summary-row .v{ font-weight: 500; text-align: right; }
+
+  @media (prefers-reduced-motion: reduce){
+    .step.active, .sub-reveal.show{ animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- ===================== ETAPA 1 — O convite ===================== -->
+  <div class="step active" id="step-1">
+    <div class="photo">
+      <img src="download (1).jpg" alt="">
+    </div>
+    <h1>Quer sair comigo?</h1>
+    <p class="subtitle">Preciso da sua respostaa, NÃO não é resposta :)</p>
+    <button class="btn-primary" onclick="goToStep(2)">ahh..ta lgl ne</button>
+  </div>
+
+  <!-- ===================== ETAPA 2 — Os detalhes ===================== -->
+  <div class="step" id="step-2">
+    <h1>eee o encontro!!</h1>
+    <p class="subtitle">como você prefere.</p>
+
+    <div class="field" id="field-dia">
+      <label class="field-label">Que dia você quer sair?<br>ficaria tristi se for um dia invalido:/ <br>
+     </label>
+      <input type="date" id="f-dia">
+      <p class="error-msg" id="err-dia">Escolhe um dia pra gente sair.</p>
+    </div>
+
+    <div class="field" id="field-local">
+      <label class="field-label">Onde?</label>
+      <div class="options">
+        <label class="option">
+          <input type="radio" name="local" value="tenho" onchange="toggleLocal(true)">
+          <span>Tenho um lugar em mente</span>
+        </label>
+        <label class="option">
+          <input type="radio" name="local" value="escolho" onchange="toggleLocal(false)">
+          <span>Você escolhe</span>
+        </label>
+      </div>
+      <div class="sub-reveal" id="local-input-wrap">
+        <input type="text" id="f-local" placeholder="Qual lugar?">
+        <p class="error-msg" id="err-local-texto">Escreve qual lugar você tem em mente.</p>
+      </div>
+      <div class="sub-reveal" id="local-nota" style="margin-top:10px;">
+        <p class="note">Perfeito, deixa comigo — eu escolho um lugar boom.</p>
+      </div>
+      <p class="error-msg" id="err-local">Escolhe uma das opções acima.</p>
+    </div>
+
+    <div class="field" id="field-hora">
+      <label class="field-label">Que horas? </label>
+      <input type="time" id="f-hora">
+      <p class="error-msg" id="err-hora">Escolhe um horário.</p>
+    </div>
+
+    <div class="field" id="field-busca">
+      <label class="field-label">Posso te buscar na sua casa?  <br> rlx Não vou te sequestrar ok?<br></label>
+      <div class="options">
+        <label class="option">
+          <input type="radio" name="busca" value="sim" onchange="toggleBusca(true)">
+          <span>Sim</span>
+        </label>
+        <label class="option">
+          <input type="radio" name="busca" value="nao" onchange="toggleBusca(false)">
+          <span>Não</span>
+        </label>
+      </div>
+      <div class="sub-reveal" id="endereco-wrap">
+        <input type="text" id="f-endereco" placeholder="Qual o endereço?">
+        <p class="error-msg" id="err-endereco">Escreve o endereço pra eu te buscar oxee.</p>
+      </div>
+      <p class="error-msg" id="err-busca">Escolhe uma das opções acima.</p>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Alguma observação?</label>
+      <textarea id="f-obs" placeholder="Se quiser me contar mais alguma coisa..."></textarea>
+    </div>
+
+    <button class="btn-primary" id="btn-enviar" onclick="submitForm()">Enviar</button>
+    <p class="send-error" id="send-error">Não deu pra enviar agora, tenta de novo em alguns segundos.</p>
+  </div>
+
+  <!-- ===================== ETAPA 3 — Confirmação ===================== -->
+  <div class="step" id="step-3">
+    <div class="photo">
+       <img src="download (2).jpg" alt="">
+    </div>
+    <h1>Combinado 🤍</h1>
+    <p class="subtitle">Aqui está o resumo do nosso encontrooooo. <br>
+    um se deu algum erro, foi mal, e se vc não querer.. ok ta tudo certo </p>
+    <div class="summary" id="summary"></div>
+  </div>
+
+</div>
+
+<script>
+  const EMAILJS_PUBLIC_KEY = "2hzSUMhUaQqJzLSGr";
+  const EMAILJS_SERVICE_ID = "service_c5rwkbz";
+  const EMAILJS_TEMPLATE_ID = "template_win66r3";
+
+  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+  function goToStep(n){
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step-' + n).classList.add('active');
+  }
+
+  function toggleLocal(temLugar){
+    const inputWrap = document.getElementById('local-input-wrap');
+    const nota = document.getElementById('local-nota');
+    if(temLugar){
+      inputWrap.classList.add('show');
+      nota.classList.remove('show');
+    } else {
+      inputWrap.classList.remove('show');
+      nota.classList.add('show');
+    }
+    clearFieldError('field-local', 'err-local');
+  }
+
+  function toggleBusca(vaiBuscar){
+    const wrap = document.getElementById('endereco-wrap');
+    if(vaiBuscar){
+      wrap.classList.add('show');
+    } else {
+      wrap.classList.remove('show');
+      hideError('err-endereco');
+    }
+    clearFieldError('field-busca', 'err-busca');
+  }
+
+  function formatDate(value){
+    const [ano, mes, dia] = value.split('-');
+    return `${dia}/${mes}/${ano}`;
+  }
+
+  function showError(fieldId, errId){
+    if(fieldId) document.getElementById(fieldId).classList.add('invalid');
+    document.getElementById(errId).classList.add('show');
+  }
+  function hideError(errId){
+    document.getElementById(errId).classList.remove('show');
+  }
+  function clearFieldError(fieldId, errId){
+    document.getElementById(fieldId).classList.remove('invalid');
+    hideError(errId);
+  }
+
+  // Retorna null se tudo válido, ou um objeto com os dados prontos pra enviar
+  function validarFormulario(){
+    let valido = true;
+
+    // Dia
+    const diaValue = document.getElementById('f-dia').value;
+    if(!diaValue){
+      showError('field-dia', 'err-dia');
+      valido = false;
+    } else {
+      clearFieldError('field-dia', 'err-dia');
+    }
+
+    // Local
+    const localRadio = document.querySelector('input[name="local"]:checked');
+    let local = "";
+    if(!localRadio){
+      showError('field-local', 'err-local');
+      valido = false;
+    } else {
+      clearFieldError('field-local', 'err-local');
+      if(localRadio.value === 'tenho'){
+        const textoLocal = document.getElementById('f-local').value.trim();
+        if(!textoLocal){
+          document.getElementById('err-local-texto').classList.add('show');
+          valido = false;
+        } else {
+          document.getElementById('err-local-texto').classList.remove('show');
+          local = textoLocal;
+        }
+      } else {
+        document.getElementById('err-local-texto').classList.remove('show');
+        local = "Você escolhe";
+      }
+    }
+
+    // Hora
+    const horaValue = document.getElementById('f-hora').value;
+    if(!horaValue){
+      showError('field-hora', 'err-hora');
+      valido = false;
+    } else {
+      clearFieldError('field-hora', 'err-hora');
+    }
+
+    // Busca
+    const buscaRadio = document.querySelector('input[name="busca"]:checked');
+    let busca = "";
+    let endereco = "";
+    if(!buscaRadio){
+      showError('field-busca', 'err-busca');
+      valido = false;
+    } else {
+      clearFieldError('field-busca', 'err-busca');
+      busca = buscaRadio.value === 'sim' ? "Sim" : "Não";
+      if(buscaRadio.value === 'sim'){
+        endereco = document.getElementById('f-endereco').value.trim();
+        if(!endereco){
+          document.getElementById('err-endereco').classList.add('show');
+          valido = false;
+        } else {
+          document.getElementById('err-endereco').classList.remove('show');
+        }
+      } else {
+        document.getElementById('err-endereco').classList.remove('show');
+      }
+    }
+
+    if(!valido) return null;
+
+    return {
+      dia: formatDate(diaValue),
+      local: local,
+      hora: horaValue,
+      busca: busca,
+      endereco: endereco || "Não se aplica",
+      obs: document.getElementById('f-obs').value.trim() || "Nenhuma"
+    };
+  }
+
+  function submitForm(){
+    const dados = validarFormulario();
+    if(!dados){
+      const primeiroErro = document.querySelector('.field.invalid, .error-msg.show');
+      if(primeiroErro) primeiroErro.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    document.getElementById('send-error').classList.remove('show');
+    const btn = document.getElementById('btn-enviar');
+    btn.disabled = true;
+    btn.textContent = "Enviando...";
+
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      dia: dados.dia,
+      local: dados.local,
+      hora: dados.hora,
+      busca: dados.busca,
+      endereco: dados.endereco,
+      obs: dados.obs
+    }).then(function(){
+      mostrarResumo(dados);
+      goToStep(3);
+    }).catch(function(erro){
+      console.error('Erro ao enviar:', erro);
+      document.getElementById('send-error').classList.add('show');
+    }).finally(function(){
+      btn.disabled = false;
+      btn.textContent = "Enviar";
+    });
+  }
+
+  function mostrarResumo(dados){
+    let rows = `
+      <div class="summary-row"><span class="k">Dia</span><span class="v">${dados.dia}</span></div>
+      <div class="summary-row"><span class="k">Local</span><span class="v">${dados.local}</span></div>
+      <div class="summary-row"><span class="k">Hora</span><span class="v">${dados.hora}</span></div>
+      <div class="summary-row"><span class="k">Busca em casa</span><span class="v">${dados.busca}</span></div>
+    `;
+    if(dados.busca === "Sim"){
+      rows += `<div class="summary-row"><span class="k">Endereço</span><span class="v">${dados.endereco}</span></div>`;
+    }
+    rows += `<div class="summary-row"><span class="k">Obs</span><span class="v">${dados.obs}</span></div>`;
+    document.getElementById('summary').innerHTML = rows;
+  }
+</script>
+
+</body>
+</html>
