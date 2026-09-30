@@ -142,6 +142,34 @@
 
   textarea{ resize: vertical; min-height: 80px; }
 
+  .hora-container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .hora-container select{
+    width: 100px;
+    padding: 12px 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: #e7e7e7;
+    color: var(--ink);
+    outline: none;
+  }
+
+  .hora-container select:focus{
+    border-color: var(--accent);
+  }
+
+  .hora-container span{
+    font-size: 20px;
+    font-weight: 600;
+  }
+
   .options{
     display: flex;
     flex-direction: column;
@@ -278,8 +306,48 @@
     </div>
 
     <div class="field" id="field-hora">
-      <label class="field-label">Que horas? </label>
-      <input type="time" id="f-hora">
+      <label class="field-label">Que horas?</label>
+
+      <div class="hora-container">
+        <select id="f-hora-h" aria-label="Hora">
+          <option value="">Hora</option>
+          <option value="00">00</option>
+          <option value="01">01</option>
+          <option value="02">02</option>
+          <option value="03">03</option>
+          <option value="04">04</option>
+          <option value="05">05</option>
+          <option value="06">06</option>
+          <option value="07">07</option>
+          <option value="08">08</option>
+          <option value="09">09</option>
+          <option value="10">10</option>
+          <option value="11">11</option>
+          <option value="12">12</option>
+          <option value="13">13</option>
+          <option value="14">14</option>
+          <option value="15">15</option>
+          <option value="16">16</option>
+          <option value="17">17</option>
+          <option value="18">18</option>
+          <option value="19">19</option>
+          <option value="20">20</option>
+          <option value="21">21</option>
+          <option value="22">22</option>
+          <option value="23">23</option>
+        </select>
+
+        <span>:</span>
+
+        <select id="f-hora-m" aria-label="Minutos">
+          <option value="">Min</option>
+          <option value="00">00</option>
+          <option value="15">15</option>
+          <option value="30">30</option>
+          <option value="45">45</option>
+        </select>
+      </div>
+
       <p class="error-msg" id="err-hora">Escolhe um horário.</p>
     </div>
 
@@ -414,11 +482,16 @@
     }
 
     // Hora
-    const horaValue = document.getElementById('f-hora').value;
-    if(!horaValue){
+    const hora = document.getElementById('f-hora-h').value;
+    const minuto = document.getElementById('f-hora-m').value;
+
+    let horaValue = "";
+
+    if(!hora || !minuto){
       showError('field-hora', 'err-hora');
       valido = false;
     } else {
+      horaValue = `${hora}:${minuto}`;
       clearFieldError('field-hora', 'err-hora');
     }
 
